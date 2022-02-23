@@ -1,15 +1,10 @@
 const { ApolloServer, gql } = require('apollo-server');
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const dotenv = require('dotenv');
+dotenv.config();
+const { DB_URI, DB_NAME } = process.env; //Connect with Client
 
-const books = [
-	{
-		title: 'The Awakening',
-		author: 'Kate Chopin',
-	},
-	{
-		title: 'City of Glass',
-		author: 'Paul Auster',
-	},
-];
+process.env.DB_URI;
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -35,15 +30,35 @@ const typeDefs = gql`
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
 	Query: {
-		books: () => books,
+		books: (root, data, context) => {
+			// console.log(context.db);
+			return books;
+		},
 	},
 };
 
-// The ApolloServer constructor requires two parameters: your schema
-// definition and your set of resolvers.
-const server = new ApolloServer({ typeDefs, resolvers });
+const start = async () => {
+	const client = new MongoClient(DB_URI, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+		serverApi: ServerApiVersion.v1,
+	});
 
-// The `listen` method launches a web server.
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
-});
+	await client.connect();
+	const db = client.db(DB_NAME); // Easier to access all the tables
+
+	const context = {
+		db,
+	};
+
+	// The ApolloServer constructor requires two parameters: your schema
+	// definition and your set of resolvers.
+	const server = new ApolloServer({ typeDefs, resolvers, context });
+
+	// The `listen` method launches a web server.
+	server.listen().then(({ url }) => {
+		console.log(`🚀  Server ready at ${url}`);
+	});
+};
+
+start();
