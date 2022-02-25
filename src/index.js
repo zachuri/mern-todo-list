@@ -15,14 +15,37 @@ const typeDefs = gql`
 	# The "Query" type is special: it lists all of the available queries that
 	# clients can execute, along with the return type for each. In this
 	# case, the "books" query returns an array of zero or more Books (defined above).
+
 	type Query {
-		books: [Book]
+		myTaskLists: [TaskList!]!
 	}
 
-	# This "Book" type defines the queryable fields for every book in our data source.
-	type Book {
-		title: String
-		author: String
+	type User {
+		id: ID!
+		user: String!
+		name: String!
+		email: String!
+		avatar: String
+	}
+
+	type TaskList {
+		id: ID!
+		createAt: String!
+		title: String!
+		progress: Float!
+
+		# Array of Users (Importance for User and Array)
+		user: [User!]!
+		# todos
+	}
+
+	type ToDo {
+		id: ID!
+		content: String!
+		isComplete: Boolean!
+
+		taskListId: ID!
+		taskList: TaskList!
 	}
 `;
 
@@ -30,10 +53,7 @@ const typeDefs = gql`
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
 	Query: {
-		books: (root, data, context) => {
-			// console.log(context.db);
-			return books;
-		},
+		myTaskLists: () => [],
 	},
 };
 
