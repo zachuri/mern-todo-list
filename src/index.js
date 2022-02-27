@@ -200,6 +200,7 @@ const resolvers = {
 			};
 		},
 
+		// Updated the task list with the user and id, title of the task
 		updateTaskList: async (_, { id, title }, { db, user }) => {
 			if (!user) {
 				throw new Error('Authentication Error. Please Sign In');
