@@ -77,7 +77,7 @@ const resolvers = {
 
 			const newUser = {
 				...input,
-				pasword: hashedPassword,
+				password: hashedPassword,
 			};
 
 			// save to database
@@ -89,11 +89,39 @@ const resolvers = {
 			const fetched = await db.collection('Users').findOne(id);
 			return {
 				user: fetched,
-				token: 'placeholder token until get to vid part',
+				token: 'token',
 			};
 		},
 
-		signIn: () => {},
+		signIn: async (_, { input }, { db }) => {
+			const user = await db
+				.collection('Users')
+				.findOne({ email: input.email });
+
+			// console.log(user); //If user is NULL-> doesn't exist
+
+			if (!user) {
+				// Never specify the error (data breach)
+				// Will give too much info to hackers
+				// E.g. ___ doesn't exist
+				throw new Error('Invalid credentials!');
+			}
+
+			// check if password is correct
+			const isPasswordCorrect = bcrypt.compareSync(
+				input.password, // compare unhashed password
+				user.password // compare with hashed password
+			);
+
+			if (!isPasswordCorrect) {
+				throw new Error('Invalid credentials!');
+			}
+
+			return {
+				user,
+				token: 'token',
+			};
+		},
 	},
 
 	// Fix Error: MongoDB returns User._id
