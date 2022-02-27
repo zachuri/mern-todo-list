@@ -98,7 +98,17 @@ const typeDefs = gql`
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
 	Query: {
-		myTaskLists: () => [],
+		// async (_, __, context) 2nd param has double underscore
+		myTaskLists: async (_, __, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			return await db
+				.collection('TaskList')
+				.find({ userIds: user._id })
+				.toArray();
+		},
 	},
 	Mutation: {
 		// (root, data, context)
@@ -178,13 +188,13 @@ const resolvers = {
 			const fetched = await db.collection('TaskList').findOne(id);
 			console.log(fetched);
 
-			const { _id, createdAt, userIds} = fetched;
+			const { _id, createdAt, userIds } = fetched;
 
 			return {
 				_id,
 				createdAt,
 				title,
-                userIds
+				userIds,
 			};
 		},
 	},
