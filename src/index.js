@@ -1,11 +1,35 @@
 const { ApolloServer, gql } = require('apollo-server');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectID } = require('mongodb');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 dotenv.config();
-const { DB_URI, DB_NAME } = process.env; //Connect with Client
-process.env.DB_URI;
+const { DB_URI, DB_NAME, JWT_SECRET } = process.env; // Connect with Client
+
+const getToken = (user) =>
+	jwt.sign(
+		{
+			id: user._id,
+		},
+		JWT_SECRET,
+		{ expiresIn: '7 days' } // Causes user to resign in
+	);
+
+const getUserFromToken = async (token, db) => {
+	if (!token) {
+		return null;
+	}
+	const tokenData = jwt.verify(token, JWT_SECRET);
+
+	if (!tokenData?.id) {
+		// "?" -> check if undefind (id is undefined)
+		// "!" -> check it's false (empty)
+		return null;
+	}
+
+	return await db.collection('Users').findOne({ _id: ObjectID(tokenData.id) });
+};
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -69,7 +93,7 @@ const resolvers = {
 	},
 	Mutation: {
 		// (root, data, context)
-		signUp: async (_, { input }, { db }) => {
+		signUp: async (_, { input }, { db, user }) => {
 			// console.log(input); // Will contain everything From input
 
 			const hashedPassword = bcrypt.hashSync(input.password);
@@ -98,28 +122,27 @@ const resolvers = {
 				.collection('Users')
 				.findOne({ email: input.email });
 
+			// check if password is correct
+			const isPasswordCorrect =
+				user && // check if user is undefined
+				bcrypt.compareSync(
+					input.password, // compare unhashed password
+					user.password || '' // check if password empty or compare hashed pass
+				);
+
 			// console.log(user); //If user is NULL-> doesn't exist
 
-			if (!user) {
+			if (!user || !isPasswordCorrect) {
 				// Never specify the error (data breach)
 				// Will give too much info to hackers
 				// E.g. ___ doesn't exist
 				throw new Error('Invalid credentials!');
 			}
 
-			// check if password is correct
-			const isPasswordCorrect = bcrypt.compareSync(
-				input.password, // compare unhashed password
-				user.password // compare with hashed password
-			);
-
-			if (!isPasswordCorrect) {
-				throw new Error('Invalid credentials!');
-			}
-
 			return {
 				user,
-				token: 'token',
+				token: getToken(user), // User with a token for Resign in
+				// Encrypted token (saved on local storage)
 			};
 		},
 	},
@@ -150,13 +173,22 @@ const start = async () => {
 	await client.connect();
 	const db = client.db(DB_NAME); // Easier to access all the tables
 
-	const context = {
-		db,
-	};
-
 	// The ApolloServer constructor requires two parameters: your schema
 	// definition and your set of resolvers.
-	const server = new ApolloServer({ typeDefs, resolvers, context });
+	const server = new ApolloServer({
+		typeDefs,
+		resolvers,
+		context: async ({ req }) => {
+			// console.log(req.headers);
+			const user = await getUserFromToken(req.headers.authorization, db);
+			// console.log(user);
+
+			return {
+				db,
+				user,
+			};
+		},
+	});
 
 	// The `listen` method launches a web server.
 	server.listen().then(({ url }) => {
