@@ -41,6 +41,7 @@ const typeDefs = gql`
 	# case, the "books" query returns an array of zero or more Books (defined above).
 	type Query {
 		myTaskLists: [TaskList!]!
+		getTaskList(id: ID!): TaskList
 	}
 
 	type Mutation {
@@ -111,6 +112,15 @@ const resolvers = {
 				.collection('TaskList')
 				.find({ userIds: user._id })
 				.toArray();
+		},
+
+		// Query that gets a task list with an ID
+		getTaskList: async (_, { id }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			return await db.collection('TaskList').findOne({ _id: ObjectID(id) });
 		},
 	},
 	Mutation: {
