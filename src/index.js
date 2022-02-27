@@ -106,6 +106,9 @@ const resolvers = {
 
 		signIn: () => {},
 	},
+
+
+    // This is to get the User Collection & get the id 
 	User: {
 		// id: (root) => {     // your choice to destructur it
 		id: ({ _id, id }) => {
