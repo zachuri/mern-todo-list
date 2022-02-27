@@ -12,37 +12,30 @@ process.env.DB_URI;
 // your data.
 const typeDefs = gql`
 	# Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
 	# The "Query" type is special: it lists all of the available queries that
 	# clients can execute, along with the return type for each. In this
 	# case, the "books" query returns an array of zero or more Books (defined above).
-
 	type Query {
 		myTaskLists: [TaskList!]!
 	}
-
 	type Mutation {
 		signUp(input: SignUpInput): AuthUser!
 		signIn(input: SignInInput): AuthUser!
 	}
-
 	input SignUpInput {
 		email: String!
 		password: String!
 		name: String!
 		avatar: String
 	}
-
 	input SignInInput {
 		email: String!
 		password: String!
 	}
-
 	type AuthUser {
 		user: User!
 		token: String!
 	}
-
 	type User {
 		id: ID!
 		user: String!
@@ -50,23 +43,19 @@ const typeDefs = gql`
 		email: String!
 		avatar: String
 	}
-
 	type TaskList {
 		id: ID!
 		createAt: String!
 		title: String!
 		progress: Float!
-
 		# Array of Users (Importance for User and Array)
 		user: [User!]!
 		# todos
 	}
-
 	type ToDo {
 		id: ID!
 		content: String!
 		isComplete: Boolean!
-
 		taskListId: ID!
 		taskList: TaskList!
 	}
@@ -107,17 +96,19 @@ const resolvers = {
 		signIn: () => {},
 	},
 
-
-    // This is to get the User Collection & get the id 
+	// Fix Error: MongoDB returns User._id
+	// need User.id (no _)
 	User: {
 		// id: (root) => {     // your choice to destructur it
-		id: ({ _id, id }) => {
-			// your choice to destructur it
-			// console.log(root);
-			// return root._id; // Getting _id with just id
 
-			_id || id; // Return either _id  or id if not null
-		},
+		// id: ({ _id, id }) => {
+		// 	// your choice to destructur it
+		// 	// console.log(root);
+		// 	// return root._id; // Getting _id with just id
+		// },
+
+		// Simpler Way
+		id: ({ _id, id }) => _id || id, // Return either _id  or id if not null
 	},
 };
 
