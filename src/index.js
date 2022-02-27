@@ -51,6 +51,7 @@ const typeDefs = gql`
 		createTaskList(title: String!): TaskList!
 		updateTaskList(id: ID!, title: String!): TaskList!
 		deleteTaskList(id: ID!): Boolean!
+		addUserToTaskList(taskListId: ID!, userId: ID!): TaskList
 	}
 
 	input SignUpInput {
@@ -220,6 +221,7 @@ const resolvers = {
 				.collection('TaskList')
 				.updateOne({ _id: ObjectID(id) }, { $set: { title: title } }); // use set if you want to update one field
 			id = result.insertedId;
+
 			const fetched = await db.collection('TaskList').findOne(id);
 			return fetched;
 		},
@@ -233,6 +235,41 @@ const resolvers = {
 			await db.collection('TaskList').deleteOne({ _id: ObjectID(id) });
 
 			return true;
+		},
+
+		// Add a user to the task list by adding an id to the UserID array
+		addUserToTaskList: async (_, { taskListId, userId }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			const taskList = await db
+				.collection('TaskList')
+				.findOne({ _id: ObjectID(taskListId) }); // use set if you want to update one field
+
+			// if taskList doesn't exist return null
+			if (!taskList) {
+				return null;
+			}
+
+			// Check if user is already in side (return the original taskList)
+			if (
+				taskList.userIds.find(
+					(dbID) => dbID.toString() === userId.toString()
+				)
+			) {
+				return taskList;
+			}
+
+			// If all true, add user to the task list with all the other users (array)
+			await db
+				.collection('TaskList')
+				.updateOne(
+					{ _id: ObjectID(taskListId) },
+					{ $push: { userIds: ObjectID(userId) } }
+				); // use push to add to array
+			taskList.userIds.push(ObjectID(userId));
+			return taskList;
 		},
 	},
 
