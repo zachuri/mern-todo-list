@@ -42,24 +42,31 @@ const typeDefs = gql`
 	type Query {
 		myTaskLists: [TaskList!]!
 	}
+
 	type Mutation {
 		signUp(input: SignUpInput): AuthUser!
 		signIn(input: SignInInput): AuthUser!
+
+		createTaskList(title: String!): TaskList!
 	}
+
 	input SignUpInput {
 		email: String!
 		password: String!
 		name: String!
 		avatar: String
 	}
+
 	input SignInInput {
 		email: String!
 		password: String!
 	}
+
 	type AuthUser {
 		user: User!
 		token: String!
 	}
+
 	type User {
 		id: ID!
 		user: String!
@@ -67,15 +74,17 @@ const typeDefs = gql`
 		email: String!
 		avatar: String
 	}
+
 	type TaskList {
 		id: ID!
-		createAt: String!
+		createdAt: String!
 		title: String!
 		progress: Float!
 		# Array of Users (Importance for User and Array)
-		user: [User!]!
+		users: [User!]!
 		# todos
 	}
+
 	type ToDo {
 		id: ID!
 		content: String!
@@ -93,7 +102,7 @@ const resolvers = {
 	},
 	Mutation: {
 		// (root, data, context)
-		signUp: async (_, { input }, { db, user }) => {
+		signUp: async (_, { input }, { db }) => {
 			// console.log(input); // Will contain everything From input
 
 			const hashedPassword = bcrypt.hashSync(input.password);
@@ -111,6 +120,9 @@ const resolvers = {
 			// Alternative way to get recent inserted object
 			id = result.insertedId;
 			const fetched = await db.collection('Users').findOne(id);
+
+			console.log(fetched);
+
 			return {
 				user: fetched,
 				token: 'token',
@@ -145,6 +157,36 @@ const resolvers = {
 				// Encrypted token (saved on local storage)
 			};
 		},
+
+		createTaskList: async (_, { title }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			const newTaskList = {
+				title,
+				createdAt: new Date().toISOString(),
+				userIds: [user._id],
+			};
+
+			// save to database
+			const result = await db.collection('TaskList').insertOne(newTaskList);
+			console.log(result); // shows whats being send to the data base
+
+			// Alternative way to get recent inserted object
+			id = result.insertedId;
+			const fetched = await db.collection('TaskList').findOne(id);
+			console.log(fetched);
+
+			const { _id, createdAt, userIds} = fetched;
+
+			return {
+				_id,
+				createdAt,
+				title,
+                userIds
+			};
+		},
 	},
 
 	// Fix Error: MongoDB returns User._id
@@ -160,6 +202,17 @@ const resolvers = {
 
 		// Simpler Way
 		id: ({ _id, id }) => _id || id, // Return either _id  or id if not null
+	},
+
+	TaskList: {
+		id: ({ _id, id }) => _id || id, // Return either _id  or id if not null
+		progress: () => 0,
+		users: async ({ userIds }, _, { db }) =>
+			Promise.all(
+				userIds.map((userId) =>
+					db.collection('Users').findOne({ _id: userId })
+				)
+			),
 	},
 };
 
