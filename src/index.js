@@ -1,9 +1,10 @@
 const { ApolloServer, gql } = require('apollo-server');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
+
 dotenv.config();
 const { DB_URI, DB_NAME } = process.env; //Connect with Client
-
 process.env.DB_URI;
 
 // A schema is a collection of type definitions (hence "typeDefs")
@@ -18,6 +19,28 @@ const typeDefs = gql`
 
 	type Query {
 		myTaskLists: [TaskList!]!
+	}
+
+	type Mutation {
+		signUp(input: SignUpInput): AuthUser!
+		signIn(input: SignInInput): AuthUser!
+	}
+
+	input SignUpInput {
+		email: String!
+		password: String!
+		name: String!
+		avatar: String
+	}
+
+	input SignInInput {
+		email: String!
+		password: String!
+	}
+
+	type AuthUser {
+		user: User!
+		token: String!
 	}
 
 	type User {
@@ -54,6 +77,44 @@ const typeDefs = gql`
 const resolvers = {
 	Query: {
 		myTaskLists: () => [],
+	},
+	Mutation: {
+		// (root, data, context)
+		signUp: async (_, { input }, { db }) => {
+			// console.log(input); // Will contain everything From input
+
+			const hashedPassword = bcrypt.hashSync(input.password);
+			// console.log(hashedPassword); // One Way Hashing
+
+			const newUser = {
+				...input,
+				pasword: hashedPassword,
+			};
+
+			// save to database
+			const result = await db.collection('Users').insertOne(newUser);
+			// console.log(result); // shows whats being send to the data base
+
+			// Alternative way to get recent inserted object
+			id = result.insertedId;
+			const fetched = await db.collection('Users').findOne(id);
+			return {
+				user: fetched,
+				token: 'placeholder token until get to vid part',
+			};
+		},
+
+		signIn: () => {},
+	},
+	User: {
+		// id: (root) => {     // your choice to destructur it
+		id: ({ _id, id }) => {
+			// your choice to destructur it
+			// console.log(root);
+			// return root._id; // Getting _id with just id
+
+			_id || id; // Return either _id  or id if not null
+		},
 	},
 };
 
