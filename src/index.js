@@ -179,6 +179,8 @@ const start = async () => {
 		typeDefs,
 		resolvers,
 		context: async ({ req }) => {
+			// Decode token and add the user to Conext
+
 			// console.log(req.headers);
 			const user = await getUserFromToken(req.headers.authorization, db);
 			// console.log(user);
