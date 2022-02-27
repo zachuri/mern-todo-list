@@ -48,6 +48,7 @@ const typeDefs = gql`
 		signIn(input: SignInInput): AuthUser!
 
 		createTaskList(title: String!): TaskList!
+		updateTaskList(id: ID!, title: String!): TaskList!
 	}
 
 	input SignUpInput {
@@ -98,6 +99,7 @@ const typeDefs = gql`
 // schema. This resolver retrieves books from the "books" array above.
 const resolvers = {
 	Query: {
+		// Query that shows the task list
 		// async (_, __, context) 2nd param has double underscore
 		myTaskLists: async (_, __, { db, user }) => {
 			if (!user) {
@@ -196,6 +198,18 @@ const resolvers = {
 				title,
 				userIds,
 			};
+		},
+
+		updateTaskList: async (_, { id, title }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+			const result = await db
+				.collection('TaskList')
+				.updateOne({ _id: ObjectID(id) }, { $set: { title: title } }); // use set if you want to update one field
+			id = result.insertedId;
+			const fetched = await db.collection('TaskList').findOne(id);
+			return fetched;
 		},
 	},
 
