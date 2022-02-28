@@ -54,6 +54,7 @@ const typeDefs = gql`
 		addUserToTaskList(taskListId: ID!, userId: ID!): TaskList
 
 		createToDo(content: String!, taskListId: ID!): ToDo!
+		updateToDo(id: ID!, content: String, isCompleted: Boolean): ToDo!
 	}
 
 	input SignUpInput {
@@ -302,6 +303,20 @@ const resolvers = {
 				isCompleted,
 				taskListId,
 			};
+		},
+
+		// Updated the task list with the user and id, title of the task
+		updateToDo: async (_, data, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			// This updates the data e.g (content/isCompleted) with a specific id
+			await db
+				.collection('ToDo')
+				.updateOne({ _id: ObjectID(data.id) }, { $set: data }); // use set if you want to update one field
+
+			return await db.collection('ToDo').findOne({ _id: ObjectID(data.id) });
 		},
 	},
 
