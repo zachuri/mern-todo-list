@@ -55,6 +55,7 @@ const typeDefs = gql`
 
 		createToDo(content: String!, taskListId: ID!): ToDo!
 		updateToDo(id: ID!, content: String, isCompleted: Boolean): ToDo!
+		deleteToDo(id: ID!): Boolean!
 	}
 
 	input SignUpInput {
@@ -229,7 +230,7 @@ const resolvers = {
 			return fetched;
 		},
 
-		// Delete an item from the task list with the same ID
+		// Delete a TaskList from Tasklist Collection with the same ID
 		deleteTaskList: async (_, { id }, { db, user }) => {
 			if (!user) {
 				throw new Error('Authentication Error. Please Sign In');
@@ -317,6 +318,17 @@ const resolvers = {
 				.updateOne({ _id: ObjectID(data.id) }, { $set: data }); // use set if you want to update one field
 
 			return await db.collection('ToDo').findOne({ _id: ObjectID(data.id) });
+		},
+
+		// Delete an item from the task list with the same ID
+		deleteToDo: async (_, { id }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+			// TODO only collaborators of this taks list should be able to delete
+			await db.collection('ToDo').deleteOne({ _id: ObjectID(id) });
+
+			return true;
 		},
 	},
 
