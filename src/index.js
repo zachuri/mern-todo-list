@@ -330,6 +330,7 @@ const resolvers = {
 				)
 			),
 
+		// connected Todo with TaskList
 		todos: async ({ _id }, _, { db }) =>
 			await db
 				.collection('ToDo')
