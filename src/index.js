@@ -88,7 +88,7 @@ const typeDefs = gql`
 		progress: Float!
 		# Array of Users (Importance for User and Array)
 		users: [User!]!
-		# todos
+		todos: [ToDo!]!
 	}
 
 	type ToDo {
@@ -329,6 +329,12 @@ const resolvers = {
 					db.collection('Users').findOne({ _id: userId })
 				)
 			),
+
+		todos: async ({ _id }, _, { db }) =>
+			await db
+				.collection('ToDo')
+				.find({ taskListId: ObjectID(_id) })
+				.toArray(),
 	},
 
 	ToDo: {
