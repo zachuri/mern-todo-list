@@ -52,6 +52,8 @@ const typeDefs = gql`
 		updateTaskList(id: ID!, title: String!): TaskList!
 		deleteTaskList(id: ID!): Boolean!
 		addUserToTaskList(taskListId: ID!, userId: ID!): TaskList
+
+		createToDo(content: String!, taskListId: ID!): ToDo!
 	}
 
 	input SignUpInput {
@@ -92,7 +94,7 @@ const typeDefs = gql`
 	type ToDo {
 		id: ID!
 		content: String!
-		isComplete: Boolean!
+		isCompleted: Boolean!
 		taskListId: ID!
 		taskList: TaskList!
 	}
@@ -195,7 +197,7 @@ const resolvers = {
 
 			// save to database
 			const result = await db.collection('TaskList').insertOne(newTaskList);
-			console.log(result); // shows whats being send to the data base
+			// console.log(result); // shows whats being send to the data base
 
 			// Alternative way to get recent inserted object
 			id = result.insertedId;
@@ -271,6 +273,36 @@ const resolvers = {
 			taskList.userIds.push(ObjectID(userId));
 			return taskList;
 		},
+
+		// ToDo Items
+		createToDo: async (_, { content, taskListId }, { db, user }) => {
+			if (!user) {
+				throw new Error('Authentication Error. Please Sign In');
+			}
+
+			const newToDo = {
+				content,
+				taskListId: ObjectID(taskListId),
+				isCompleted: false,
+			};
+
+			// save to database
+			const result = await db.collection('ToDo').insertOne(newToDo);
+			// console.log(result); // shows whats being send to the data base
+
+			// Alternative way to get recent inserted object
+			id = result.insertedId;
+			const fetched = await db.collection('ToDo').findOne(id);
+			// console.log(fetched);
+
+			const { isCompleted } = fetched;
+			return {
+				id,
+				content,
+				isCompleted,
+				taskListId,
+			};
+		},
 	},
 
 	// Fix Error: MongoDB returns User._id
@@ -297,6 +329,12 @@ const resolvers = {
 					db.collection('Users').findOne({ _id: userId })
 				)
 			),
+	},
+
+	ToDo: {
+		id: ({ _id, id }) => _id || id, // Return either _id  or id if not null
+		taskList: async ({ taskListId }, _, { db }) =>
+			await db.collection('TaskList').findOne({ _id: ObjectID(taskListId) }),
 	},
 };
 
