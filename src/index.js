@@ -149,7 +149,7 @@ const resolvers = {
 			id = result.insertedId;
 			const fetched = await db.collection('Users').findOne(id);
 
-			console.log(fetched);
+			// console.log(fetched);
 
 			return {
 				user: fetched,
@@ -204,7 +204,7 @@ const resolvers = {
 			// Alternative way to get recent inserted object
 			id = result.insertedId;
 			const fetched = await db.collection('TaskList').findOne(id);
-			console.log(fetched);
+			// console.log(fetched);
 
 			const { _id, createdAt, userIds } = fetched;
 
@@ -349,7 +349,23 @@ const resolvers = {
 
 	TaskList: {
 		id: ({ _id, id }) => _id || id, // Return either _id  or id if not null
-		progress: () => 0,
+
+		// This object is to return the tasklist progress percentage of completed
+		progress: async ({ _id }, _, { db }) => {
+			const todos = await db
+				.collection('ToDo')
+				.find({ taskListId: ObjectID(_id) })
+				.toArray();
+
+			const completed = todos.filter((todo) => todo.isCompleted);
+
+			if (todos.length === 0) {
+				return 0;
+			}
+
+			return (100 * completed.length) / todos.length;
+		},
+
 		users: async ({ userIds }, _, { db }) =>
 			Promise.all(
 				userIds.map((userId) =>
