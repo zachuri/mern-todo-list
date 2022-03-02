@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import React from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import styles from './styles';
@@ -12,8 +12,12 @@ interface ProjectItemProps {
 }
 
 const ProjectItem = ({ project }: ProjectItemProps) => {
+	const onPress = () => {
+		console.warn(`open project ${project.title}`);
+	};
+
 	return (
-		<View style={styles.root}>
+		<Pressable onPress={onPress} style={styles.root}>
 			{/* Project/Task List  */}
 			<View style={styles.iconContainer}>
 				<MaterialCommunityIcons
@@ -26,7 +30,7 @@ const ProjectItem = ({ project }: ProjectItemProps) => {
 				<Text style={styles.title}>{project.title}</Text>
 				<Text style={styles.time}>{project.createdAt}</Text>
 			</View>
-		</View>
+		</Pressable>
 	);
 };
 
