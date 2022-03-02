@@ -28,6 +28,7 @@ import {
 import LinkingConfiguration from './LinkingConfiguration';
 import ProjectScreen from '../screens/ProjectsScreen';
 import ToDoScreen from '../screens/ToDoScreen';
+import SignInScreen from '../screens/SignInScreen';
 
 export default function Navigation({
 	colorScheme,
@@ -58,6 +59,13 @@ function RootNavigator() {
 				component={BottomTabNavigator}
 				options={{ headerShown: false }}
 			/> */}
+
+			{/* By Default it will show the first Component (SignInScreen)  */}
+			<Stack.Screen
+				name="SignInScreen"
+				component={SignInScreen}
+				options={{ title: 'Sign In' }}
+			/>
 
 			{/* To add Custom Screens Make sure to add Stack.Screen */}
 			{/* Also, add the name to the types.tsx */}
