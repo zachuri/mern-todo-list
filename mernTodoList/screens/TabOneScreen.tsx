@@ -1,31 +1,52 @@
 import React, { useState } from 'react';
-import { StyleSheet, FlatList } from 'react-native';
-
+import { StyleSheet, FlatList, TextInput } from 'react-native';
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
-
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ToDoItem from '../components/ToDoItem';
+
+let id = '4';
 
 export default function TabOneScreen({
 	navigation,
 }: RootTabScreenProps<'TabOne'>) {
+	const [title, setTitle] = useState('');
+
 	const [todos, setTodos] = useState([
 		{ id: '1', content: 'Buy Milk', isCompleted: true },
 		{ id: '2', content: 'Buy cereal', isCompleted: false },
 		{ id: '3', content: 'Pour Milk', isCompleted: false },
 	]);
 
+	const createNewItem = (atIndex: number) => {
+		// console.warn(`new item at ${atIndex}`);
+		const newTodos = [...todos];
+		newTodos.splice(atIndex, 0, {
+			id: id,
+			content: '',
+			isCompleted: false,
+		});
+		setTodos(newTodos);
+	};
+
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Tab One two three </Text>
+			<TextInput
+				value={title}
+				onChangeText={setTitle}
+				placeholder={'Title'}
+				style={styles.title}
+			/>
 
 			<FlatList
 				data={todos} // Pass in the data
-
-                // passing in a prop called todo with all the data
-				renderItem={({ item }) => <ToDoItem todo={item} />}
+				// passing in a prop called todo with all the data
+				renderItem={({ item, index }) => (
+					<ToDoItem
+						todo={item}
+						onSubmit={() => createNewItem(index + 1)}
+					/>
+				)}
 				style={styles.todos}
 			/>
 		</View>
@@ -41,7 +62,12 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	title: {
+		// backgroundColor: 'red',
+		width: '100%',
 		fontSize: 20,
 		fontWeight: 'bold',
+		color: 'white',
+		marginLeft: 20,
+		marginBottom: 12,
 	},
 });

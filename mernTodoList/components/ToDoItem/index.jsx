@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, TextInput } from 'react-native';
 import Checkbox from '../Checkbox';
 
@@ -9,13 +9,14 @@ interface ToDoItemProps {
 		content: string,
 		isCompleted: boolean,
 	};
+	onSubmit: () => void;
 }
 
-const ToDoItem = ({ todo }: ToDoItemProps) => {
+const ToDoItem = ({ todo, onSubmit }: ToDoItemProps) => {
 	// todo props is passed into child component
-
 	const [isChecked, setIsChecked] = useState(false);
 	const [content, setContent] = useState('');
+	const input = useRef(null);
 
 	useEffect(() => {
 		if (!todo) {
@@ -26,6 +27,23 @@ const ToDoItem = ({ todo }: ToDoItemProps) => {
 		setIsChecked(todo.isCompleted);
 		setContent(todo.content);
 	}, [todo]);
+
+	useEffect(() => {
+		// get focus on input
+		if (input.current) {
+			input?.current?.focus();
+		}
+	}, [input]);
+
+	const onKeyPress = ({ nativeEvent }) => {
+		//On any keyboard press
+		// console.log(nativeEvent);
+
+		if (nativeEvent.key === 'Backspace' && content === '') {
+			// Delete item
+			console.warn('Delete item');
+		}
+	};
 
 	return (
 		<View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -39,10 +57,14 @@ const ToDoItem = ({ todo }: ToDoItemProps) => {
 
 			{/* Tex Input */}
 			<TextInput
+				ref={input}
 				value={content}
 				onChangeText={setContent}
 				style={styles.userInput}
 				multiline //Allow to have input on multiple lines
+				onSubmitEditing={onSubmit}
+				blurOnSubmit
+				onKeyPress={onKeyPress}
 			/>
 		</View>
 	);
