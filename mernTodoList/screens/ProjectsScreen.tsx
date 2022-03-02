@@ -17,7 +17,7 @@ export default function TabTwoScreen() {
 			createdAt: '2d',
 		},
 		{
-			id: '2',
+			id: '3',
 			title: 'Project 3',
 			createdAt: '3d',
 		},
