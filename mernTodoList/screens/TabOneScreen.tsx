@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, FlatList, TextInput } from 'react-native';
+import {
+	StyleSheet,
+	FlatList,
+	TextInput,
+	KeyboardAvoidingView,
+	Platform,
+} from 'react-native';
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
@@ -30,26 +36,34 @@ export default function TabOneScreen({
 	};
 
 	return (
-		<View style={styles.container}>
-			<TextInput
-				value={title}
-				onChangeText={setTitle}
-				placeholder={'Title'}
-				style={styles.title}
-			/>
+		// KeyboardAvoidngView -> prevents the keyboard from blocking the interface
+		<KeyboardAvoidingView
+			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			keyboardVerticalOffset={Platform.OS === 'ios' ? 130 : 0}
+			style={{ flex: 1 }}
+		>
+			<View style={styles.container}>
+				<TextInput
+					value={title}
+					onChangeText={setTitle}
+					placeholder={'Title'}
+					style={styles.title}
+				/>
 
-			<FlatList
-				data={todos} // Pass in the data
-				// passing in a prop called todo with all the data
-				renderItem={({ item, index }) => (
-					<ToDoItem
-						todo={item}
-						onSubmit={() => createNewItem(index + 1)}
-					/>
-				)}
-				style={styles.todos}
-			/>
-		</View>
+				{/* Flatlist componet -> scrolling list of data */}
+				<FlatList
+					data={todos} // Pass in the data
+					// passing in a prop called todo with all the data
+					renderItem={({ item, index }) => (
+						<ToDoItem
+							todo={item}
+							onSubmit={() => createNewItem(index + 1)}
+						/>
+					)}
+					style={styles.todos}
+				/>
+			</View>
+		</KeyboardAvoidingView>
 	);
 }
 
