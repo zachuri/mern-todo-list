@@ -1,25 +1,35 @@
-import { StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, FlatList } from 'react-native';
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import ProjectItem from '../components/ProjectItem';
 
 export default function TabTwoScreen() {
+	const [project, setProject] = useState([
+		{
+			id: '1',
+			title: 'Project 1',
+			createdAt: '1d',
+		},
+		{
+			id: '2',
+			title: 'Project 2',
+			createdAt: '2d',
+		},
+		{
+			id: '2',
+			title: 'Project 3',
+			createdAt: '3d',
+		},
+	]);
+
 	return (
 		<View style={styles.container}>
-			{/* Project/Task List  */}
-			<View style={styles.root}>
-				<View style={styles.iconContainer}>
-					<MaterialCommunityIcons
-						name="file-outline"
-						size={24}
-						color="grey"
-					/>
-				</View>
-				<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-					<Text style={styles.title}>Title</Text>
-					<Text style={styles.time}>2d</Text>
-				</View>
-			</View>
+			<FlatList
+				style={styles.flatListStyle}
+				data={project}
+				renderItem={({ item }) => <ProjectItem project={item} />}
+			/>
 		</View>
 	);
 }
@@ -30,25 +40,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	root: {
-		flexDirection: 'row',
+	flatListStyle: {
+		// If ever the icons are in the middle
+		// Set the width to 100% so it it fill the width
 		width: '100%',
-		padding: 10,
-	},
-	iconContainer: {
-		width: 40,
-		height: 40,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderRadius: 10,
-		backgroundColor: '#404040',
-		marginRight: 10,
-	},
-	title: {
-		fontSize: 20,
-		marginRight: 5,
-	},
-	time: {
-		color: 'darkgrey',
 	},
 });
