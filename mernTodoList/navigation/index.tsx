@@ -30,6 +30,7 @@ import ProjectScreen from '../screens/ProjectsScreen';
 import ToDoScreen from '../screens/ToDoScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import SplashScreen from '../screens/SplashScreen';
 
 export default function Navigation({
 	colorScheme,
@@ -62,6 +63,13 @@ function RootNavigator() {
 			/> */}
 
 			{/* By Default it will show the first Component (SignInScreen)  */}
+			<Stack.Screen
+				name="Splash"
+				component={SplashScreen}
+				options={{
+					headerShown: false,
+				}}
+			/>
 			<Stack.Screen
 				name="SignIn"
 				component={SignInScreen}
