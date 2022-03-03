@@ -1,7 +1,13 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import {
+	View,
+	Text,
+	TextInput,
+	Pressable,
+	StyleSheet,
+	ActivityIndicator,
+} from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-
 import { useMutation, gql } from '@apollo/client';
 
 // This notation allows us to write GraphQL Queries in tsx file
@@ -12,6 +18,7 @@ const SIGN_UP_MUTATION = gql`
 			user {
 				id
 				name
+				email
 			}
 		}
 	}
@@ -24,7 +31,18 @@ const SignUpScreen = () => {
 
 	const navigation = useNavigation();
 
-	const onSubmit = () => {};
+	// mutation[0] -> a function to tirgger the mutation
+	// mutation[1] -> result object
+	//      { data, error, loading }
+	const [signUp, { data, loading, error }] = useMutation(SIGN_UP_MUTATION);
+
+	console.log(data);
+	console.log(error);
+
+	const onSubmit = () => {
+		// signUp({ variables: { name: name, email: email, password: password } });
+		signUp({ variables: { name: name, email: email, password: password } });
+	};
 
 	return (
 		<View style={styles.container}>
@@ -49,10 +67,13 @@ const SignUpScreen = () => {
 			/>
 
 			<Pressable onPress={onSubmit} style={styles.signUp}>
+				{/* If loading also display loading indicator */}
+				{loading && <ActivityIndicator />}
 				<Text style={styles.signUpText}>Sign Up</Text>
 			</Pressable>
 
 			<Pressable
+				disabled={loading} // Disabled if loading
 				onPress={() => navigation.navigate('SignIn')}
 				style={styles.signIn}
 			>
@@ -91,6 +112,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginTop: 30,
+		flexDirection: 'row',
 	},
 	signUpText: {
 		color: 'white',
