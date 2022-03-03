@@ -2,6 +2,21 @@ import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
+import { useMutation, gql } from '@apollo/client';
+
+// This notation allows us to write GraphQL Queries in tsx file
+const SIGN_UP_MUTATION = gql`
+	mutation signUp($email: String!, $password: String!, $name: String!) {
+		signUp(input: { email: $email, password: $password, name: $name }) {
+			token
+			user {
+				id
+				name
+			}
+		}
+	}
+`;
+
 const SignUpScreen = () => {
 	const [email, setEmail] = useState('');
 	const [name, setName] = useState('');
@@ -56,7 +71,7 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		width: '100%',
 		marginVertical: 25,
-    },
+	},
 	email: {
 		color: 'white',
 		fontSize: 18,
