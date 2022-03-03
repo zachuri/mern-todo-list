@@ -5,9 +5,9 @@ import Checkbox from '../Checkbox';
 // Typescript specify what type it is:w
 interface ToDoItemProps {
 	todo: {
-		id: string,
-		content: string,
-		isCompleted: boolean,
+		id: string;
+		content: string;
+		isCompleted: boolean;
 	};
 	onSubmit: () => void;
 }
@@ -51,7 +51,7 @@ const ToDoItem = ({ todo, onSubmit }: ToDoItemProps) => {
 			<Checkbox
 				isChecked={isChecked}
 				onPress={() => {
-					setValue(!isChecked);
+					setIsChecked(!isChecked);
 				}}
 			/>
 
