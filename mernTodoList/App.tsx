@@ -18,6 +18,7 @@ export default function App() {
 	} else {
 		return (
 			<SafeAreaProvider>
+				{/* Setup Apolo Client  */}
 				<ApolloProvider client={client}>
 					<Navigation colorScheme={colorScheme} />
 					<StatusBar />
