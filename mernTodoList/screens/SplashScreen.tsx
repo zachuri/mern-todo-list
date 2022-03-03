@@ -2,7 +2,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import React, { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
-export default function SplashScreen() {
+const SplashScreen = () => {
 	const navigation = useNavigation();
 
 	useEffect(() => {
@@ -23,4 +23,6 @@ export default function SplashScreen() {
 			<ActivityIndicator />
 		</View>
 	);
-}
+};
+
+export default SplashScreen;
