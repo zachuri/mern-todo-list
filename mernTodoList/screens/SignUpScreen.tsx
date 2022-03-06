@@ -5,10 +5,12 @@ import {
 	Pressable,
 	StyleSheet,
 	ActivityIndicator,
+	Alert,
 } from 'react-native';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, gql } from '@apollo/client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // This notation allows us to write GraphQL Queries in tsx file
 const SIGN_UP_MUTATION = gql`
@@ -36,8 +38,19 @@ const SignUpScreen = () => {
 	//      { data, error, loading }
 	const [signUp, { data, loading, error }] = useMutation(SIGN_UP_MUTATION);
 
-	console.log(data);
-	console.log(error);
+	// console.log(data);
+	// console.log(error);
+
+	if (error) {
+		Alert.alert('Error signing up. Try again');
+	}
+
+	if (data) {
+		// if data is true -> store token & navigate to home screen
+		AsyncStorage.setItem('token', data.signUp.token).then(() => {
+			navigation.navigate('Home');
+		});
+	}
 
 	const onSubmit = () => {
 		// signUp({ variables: { name: name, email: email, password: password } });
