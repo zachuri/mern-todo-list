@@ -6,7 +6,7 @@ import {
 	StyleSheet,
 	Alert,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, gql } from '@apollo/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,13 +32,16 @@ const SignInScreen = () => {
 
 	const [signIn, { data, error, loading }] = useMutation(SIGN_IN_MUTATION);
 
-	if (error) {
-		Alert.alert('Invalid Credentials');
-	}
+	// UseEffect when only the error changes
+	useEffect(() => {
+		if (error) {
+			Alert.alert('Invalid Credentials');
+		}
+	}, [error]);
 
 	if (data) {
 		// if data is true -> store token & navigate to home screen
-		AsyncStorage.setItem('token', data.signUp.token).then(() => {
+		AsyncStorage.setItem('token', data.signIn.token).then(() => {
 			navigation.navigate('Home');
 		});
 	}

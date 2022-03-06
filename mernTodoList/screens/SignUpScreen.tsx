@@ -7,7 +7,7 @@ import {
 	ActivityIndicator,
 	Alert,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, gql } from '@apollo/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,9 +41,11 @@ const SignUpScreen = () => {
 	// console.log(data);
 	// console.log(error);
 
-	if (error) {
-		Alert.alert('Error signing up. Try again');
-	}
+	useEffect(() => {
+		if (error) {
+			Alert.alert('Error signing up. Try again');
+		}
+	}, [error]);
 
 	if (data) {
 		// if data is true -> store token & navigate to home screen

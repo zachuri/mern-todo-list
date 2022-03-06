@@ -7,6 +7,10 @@ const jwt = require('jsonwebtoken');
 dotenv.config();
 const { DB_URI, DB_NAME, JWT_SECRET } = process.env; // Connect with Client
 
+console.log(DB_URI);
+console.log(DB_NAME);
+console.log(JWT_SECRET);
+
 const getToken = (user) =>
 	jwt.sign(
 		{
