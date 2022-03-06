@@ -1,20 +1,25 @@
 import { View, Text, ActivityIndicator } from 'react-native';
 import React, { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = () => {
 	const navigation = useNavigation();
 
 	useEffect(() => {
-		if (isAuthenticated()) {
-			navigation.navigate('Home');
-		} else {
-			navigation.navigate('SignIn');
-		}
+		const checkUser = async () => {
+			if (await isAuthenticated()) {
+				navigation.navigate('Home');
+			} else {
+				navigation.navigate('SignIn');
+			}
+		};
+		checkUser();
 	}, []);
 
-	const isAuthenticated = () => {
-		return false;
+	const isAuthenticated = async () => {
+		const token = await AsyncStorage.getItem('token');
+		return !!token; // Syntax
 	};
 
 	return (
