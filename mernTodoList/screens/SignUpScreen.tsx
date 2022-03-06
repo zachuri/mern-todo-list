@@ -36,7 +36,7 @@ const SignUpScreen = () => {
 	// mutation[0] -> a function to tirgger the mutation
 	// mutation[1] -> result object
 	//      { data, error, loading }
-	const [signUp, { data, loading, error }] = useMutation(SIGN_UP_MUTATION);
+	const [signUp, { data, error, loading }] = useMutation(SIGN_UP_MUTATION);
 
 	// console.log(data);
 	// console.log(error);

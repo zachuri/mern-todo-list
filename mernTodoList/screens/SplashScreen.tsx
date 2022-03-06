@@ -18,6 +18,9 @@ const SplashScreen = () => {
 	}, []);
 
 	const isAuthenticated = async () => {
+		// use this function whenever you want to log out
+		// await AsyncStorage.removeItem('token');
+
 		const token = await AsyncStorage.getItem('token');
 		return !!token; // Syntax
 	};
